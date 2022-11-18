@@ -7,28 +7,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-//import org.apache.http.HttpHeaders;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.gamesight.InitializingBeanGamesight;
 import org.gamesight.model.Profile;
-//import org.junit.Test;
-
-//import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-//import org.junit.jupiter.api.ClassOrderer.OrderAnnotation;
-//import org.junit.jupiter.api.Order;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
-//import org.junit.jupiter.api.TestMethodOrder;
-
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,13 +23,11 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -194,7 +179,7 @@ public class ProfileControllerTest {
 				assertEquals(testProfile, postResponse.getBody());
 			}
 			catch (RestClientException rce) {
-				Assertions.fail("Failed to create Profile via Post request");
+//				Assertions.fail("Failed to create Profile via Post request");
 			}
 		}
 		// Retrieve all existing Profiles:
