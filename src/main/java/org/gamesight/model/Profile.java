@@ -113,11 +113,24 @@ public class Profile implements Serializable {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Profile profile = (Profile) o;
-		return zip == profile.zip && id.equals(profile.id) && Objects.equals(street, profile.street) && Objects.equals(city, profile.city) && Objects.equals(state, profile.state) && Objects.equals(dob, profile.dob);
+		return zip == profile.zip && Objects.equals(street, profile.street) && Objects.equals(city, profile.city) && Objects.equals(state, profile.state) && Objects.equals(dob, profile.dob);
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, street, city, state, zip, dob);
+	}
+
+	@Override
+	public String toString() {
+		return "Profile{" +
+				"id=" + id +
+				", street='" + street + '\'' +
+				", city='" + city + '\'' +
+				", state='" + state + '\'' +
+				", zip=" + zip +
+				", dob=" + dob +
+				", user=" + user +
+				'}';
 	}
 }

@@ -13,7 +13,7 @@ public class MainController {
 
 	// Mapping for no URL.
 	@GetMapping("/")
-	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseStatus(HttpStatus.OK)
 	String sayHello() {
 		return "Gamesight says Hello!";
 	}
