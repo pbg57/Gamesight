@@ -8,7 +8,7 @@ This maven based Spring-boot appplication can be downloaded, started and tested 
 3) Run tests from your maven tool window or by using 'mvn surefire:test' and 'mvn surefire-report:report'
 
 # Project Goals 
-I am developing this project to demonstrate my technical proficiency in a number of areas (and also because I love doing it!). My approach is to first develop an end-to-end 'steel thread' of execution across the entire application, and then iterate over the project to add additional functionality. This approach has worked well for me as it allows lessons-learned to be immediately and efficiently applied during each development iteration. 
+I am developing this project to demonstrate my technical proficiency in a number of areas. My approach is to first develop an end-to-end 'steel thread' of execution across the entire application, and then iterate over the project to add additional functionality. This approach works well as it allows lessons-learned to be immediately and efficiently applied during each development iteration. 
 
 # Available Functionality Update
 To make it easier to review work-to-date, here are pointers:
