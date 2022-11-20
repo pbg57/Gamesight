@@ -1,5 +1,6 @@
 package org.gamesight.controller;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,9 +38,9 @@ public class ProfileController {
 	Get all existing Profile records.
 	 */
 	@GetMapping("/api/v1/mgmt/profile")
-	Page<Profile> findAllProfiles(Pageable pageable) {
+	List<Profile> findAllProfiles() {
 
-		return Optional.of(profileRepository.findAll(pageable))
+		return Optional.of(profileRepository.findAll())
 				.orElseThrow(() -> new ResourceNotFoundException("finaAllProfiles failed"));
 	}
 

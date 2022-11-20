@@ -1,5 +1,6 @@
 package org.gamesight.test.controllers;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.Month;
@@ -68,11 +69,10 @@ public class ProfileControllerTest {
 	private final String street = "100 Controller Drive";
 
 	private final String city = "Springfield";
-	private final String cityPatch = "Pittsburgh";
+//	private final String cityPatch = "Pittsburgh";
 
 
 	private final String state = "Missouri";
-
 	private final String stateUpdate = "Pennsylvania";
 	private final String statePatch = "Arkansas";
 
@@ -97,105 +97,98 @@ public class ProfileControllerTest {
 		 */
 		HttpEntity<Profile> profileHttpEntity = new HttpEntity<>(testProfile);
 
-		String postURL = new URL("http://localhost:" + port + "/api/v1/mgmt/profile").toString();
-		ResponseEntity<Profile> postResponse = null;
-		try {
-			postResponse = restTemplate.
-					postForEntity(postURL, profileHttpEntity, Profile.class);
+		Profile createdProfile = createProfile(profileHttpEntity);
+		if (createdProfile != null) {
 			// Confirm the persisted profile matches the original:
-			assertEquals(testProfile, postResponse.getBody());
-		}
-		catch (RestClientException rce) {
-			Assertions.fail("Failed to create Profile via Post request");
-		}
-
+			assertEquals(testProfile, createdProfile);
+		} //  else failed assertion already made
 
 		/*
 		 Test Get Profile using generated PK from Create test
 		 */
-		long profileID = (postResponse.getBody() != null) ? postResponse.getBody().getId() : -1L;
 
-		String getUrl = new URL("http://localhost:" + port + "/api/v1/mgmt/profile/" + profileID).toString();
-		try {
-			ResponseEntity<Profile> getResponse = restTemplate.getForEntity(getUrl, Profile.class);
+		long profileID = (createdProfile != null) ? createdProfile.getId() : -1L;
+		Profile profile = getProfileById(profileID);
+
+		if (profile != null) {
 			// Confirm expected fields exist:
-			assertEquals(testProfile, getResponse.getBody());
-		}
-		catch (RestClientException rce) {
-			Assertions.fail("Failed fetch Profile via Get request");
-		}
+			assertEquals(testProfile, profile);
+		}	// else failed assertion already made
 
 
 		/*
 		Test Put Profile operation
 		 */
-		String putUrl = new URL("http://localhost:" + port + "/api/v1/mgmt/profile/" + profileID).toString();
-		try {
-			restTemplate.put(putUrl, testPutProfile);
+		Profile putProfile = putProfileById(profileID, testPutProfile);
+
+		if (putProfile != null) {
 			// Confirm expected fields exist:
-			ResponseEntity<Profile> getResponse = restTemplate.getForEntity(getUrl, Profile.class);
-			assertEquals(testPutProfile, getResponse.getBody());
-		}
-		catch (RestClientException rce) {
-			Assertions.fail("Failed update ofProfile via Put request");
-		}
+			assertEquals(testPutProfile, putProfile);
+		}	// else failed assertion already made
+
 
 		/*
 		Test Patch Profile operation
 		 */
-		String patchUrl = new URL("http://localhost:" + port + "/api/v1/mgmt/profile/" + profileID).toString();
 		Map<String, String>	patchMap = new HashMap<>();
 		patchMap.put("state", statePatch);
-		// Create JSON Object - update a single field in the existing Profile
+		// Create JSON Object - update a single test field in the existing Profile
 		JSONObject updateBody = new JSONObject();
 		updateBody.put("state", statePatch);
 
-		// Note: TestRestTemplate does not support the Patch operation. Use HttpClient for patching.
-		patchRestTemplate = restTemplate.getRestTemplate();
-		HttpClient httpClient = HttpClientBuilder.create().build();
-		patchRestTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
+		Profile patchedProfile = patchProfileById(profileID, updateBody);
 
-		try {
-			// Use patchRestTemplate to make call with PATCH method
-			ResponseEntity<Profile> patchResponse =
-					patchRestTemplate.exchange(patchUrl, HttpMethod.PATCH, getPatchHeaders(updateBody.toString()), Profile.class);
-				assertEquals(statePatch, patchResponse.getBody().getState());
-		}
-		catch (RestClientException rce) {
-			Assertions.fail("Failed update of Profile via Patch request");
-		}
+		if (patchedProfile != null) {
+			// Confirm requested field was updated:
+			assertEquals(statePatch, patchedProfile.getState());
+		}	// else failed assertion already made
 
 		/*
-		Test retrieval of multiple Profiles using the Pageable wrapper.
+		Test Delete Profile.
 		 */
+		boolean deleteSuccess = deleteProfileById(profileID);
 
-		// First, create a few more Profiles:
-		int profileNum = 10;
-		for (int i=0; i<profileNum; i++) {
-			try {
-				postResponse = restTemplate.
-						postForEntity(postURL, profileHttpEntity, Profile.class);
-				// Confirm the persisted profile matches the original:
-				assertEquals(testProfile, postResponse.getBody());
-			}
-			catch (RestClientException rce) {
-//				Assertions.fail("Failed to create Profile via Post request");
-			}
-		}
-		// Retrieve all existing Profiles:
-		String getAllUrl = new URL("http://localhost:" + port + "/api/v1/mgmt/profile").toString();
-		try {
-			ResponseEntity<Profile> getResponse = restTemplate.getForEntity(getAllUrl, Profile.class);
-			Profile profile = getResponse.getBody();
-			// Confirm expected fields exist:
-//			assertEquals(testProfile, getResponse.getBody());
-		}
-		catch (RestClientException rce) {
-			Assertions.fail("Failed fetch Profile via Get request");
-		}
+		if (deleteSuccess) {
+			// TODO: Confirm Profile has been removed by trying to retrieve it.
+		}	// else failed assertion already made
 
 	}
 
+//	@Test
+//	public void findAllProfile() throws Exception {
+//		logger.info(() -> "Executing crudProfile Tests...");
+///*
+//		Test retrieval of multiple Profiles using the Pageable wrapper.
+//		 */
+//		String postURL = new URL("http://localhost:" + port + "/api/v1/mgmt/profile").toString();
+//		ResponseEntity<Profile> postResponse = null;
+//
+//		// First, create a few more Profiles:
+//		int profileNum = 10;
+//		for (int i=0; i<profileNum; i++) {
+//			try {
+//				postResponse = restTemplate.
+//						postForEntity(postURL, profileHttpEntity, Profile.class);
+//				// Confirm the persisted profile matches the original:
+//				assertEquals(testProfile, postResponse.getBody());
+//			}
+//			catch (RestClientException rce) {
+////				Assertions.fail("Failed to create Profile via Post request");
+//			}
+//		}
+//		// Retrieve all existing Profiles:
+//		String getAllUrl = new URL("http://localhost:" + port + "/api/v1/mgmt/profile").toString();
+//		try {
+//			ResponseEntity<Profile[]> getResponse = restTemplate.getForEntity(getAllUrl, Profile[].class);
+//			Profile[] profiles = getResponse.getBody();
+//			// Confirm expected fields exist:
+//			assertEquals(profileNum, profiles.length);
+//		}
+//		catch (RestClientException rce) {
+//			Assertions.fail("Failed fetch Profile via Get request");
+//		}
+//
+//	}
 	public HttpEntity<String> getPatchHeaders(String jsonPostBody) {
 		List<MediaType> acceptTypes = new ArrayList<>();
 		acceptTypes.add(MediaType.APPLICATION_JSON_UTF8);
@@ -207,5 +200,113 @@ public class ProfileControllerTest {
 		return new HttpEntity<String>(jsonPostBody, reqHeaders);
 	}
 
-	// TODO - Update and Delete support
+	public void removeAllProfiles() {
+
+	}
+
+	public Profile createProfile(HttpEntity<Profile> profileHttpEntity) {
+		try {
+			String postURL = new URL("http://localhost:" + port + "/api/v1/mgmt/profile").toString();
+			ResponseEntity<Profile> postResponse = restTemplate.
+					postForEntity(postURL, profileHttpEntity, Profile.class);
+			// Caller tests persisted profile matches the original?
+			return postResponse.getBody();
+		}
+		catch (RestClientException rce) {
+			Assertions.fail("Failed to create Profile via Post request");
+			logger.error(()->"CreateProfile caught exception: " + rce.toString());
+		}
+		catch (MalformedURLException mue) {
+			Assertions.fail("CreateProfile has malformed URL");
+			logger.error(() -> "CreateProfile has malformed URL: " + mue.toString());
+		}
+		return null;
+	}
+
+	public Profile getProfileById(long profileId) {
+		/*
+		 Test Get Profile using generated PK from Create test
+		 */
+		try {
+			String getUrl = new URL("http://localhost:" + port + "/api/v1/mgmt/profile/" + profileId).toString();
+			ResponseEntity<Profile> getResponse = restTemplate.getForEntity(getUrl, Profile.class);
+			// Return Profile. Caller to validate contents.
+			return (getResponse.getBody());
+		}
+		catch (RestClientException rce) {
+			Assertions.fail("Failed fetch Profile via Get request for id: " + profileId);
+			logger.error(() -> "getProfileById caught exception: " + rce.toString());
+		}
+		catch (MalformedURLException mue) {
+			Assertions.fail("getProfileById has malformed URL");
+			logger.error(() -> "getProfileById has malformed URL: " + mue.toString());
+		}
+		return null;
+	}
+	public Profile putProfileById(long profileId, Profile putProfile) {
+		/*
+		 Test Put Profile using generated PK from Create test
+		 */
+		try {
+			String putUrl = new URL("http://localhost:" + port + "/api/v1/mgmt/profile/" + profileId).toString();
+			restTemplate.put(putUrl, putProfile);
+			ResponseEntity<Profile> putResponse = restTemplate.getForEntity(putUrl, Profile.class);
+			// Caller to confirm expected fields exist:
+			return (putResponse.getBody());
+		}
+		catch (RestClientException rce) {
+			Assertions.fail("Failed update of Profile via Put request for id: " + profileId);
+			logger.error(() -> "putProfileById caught exception: " + rce.toString());
+		}
+		catch (MalformedURLException mue) {
+			Assertions.fail("putProfileById has malformed URL");
+			logger.error(() -> "putProfileById has malformed URL: " + mue.toString());
+		}
+		return null;
+	}
+
+	public Profile patchProfileById(long profileId, JSONObject jsonUpdateBody ) {
+
+
+		// Note: TestRestTemplate does not support the Patch operation. Use HttpClient for patching.
+		patchRestTemplate = restTemplate.getRestTemplate();
+		HttpClient httpClient = HttpClientBuilder.create().build();
+		patchRestTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
+
+		// Note: the jsonUpdateBody contains the name/value Map with requested patch fields.
+		try {
+			String patchUrl = new URL("http://localhost:" + port + "/api/v1/mgmt/profile/" + profileId).toString();
+			// Use patchRestTemplate to make call with PATCH method
+			ResponseEntity<Profile> patchResponse =
+					patchRestTemplate.exchange(patchUrl, HttpMethod.PATCH, getPatchHeaders(jsonUpdateBody.toString()), Profile.class);
+			// Caller to confirm patch results.
+			return patchResponse.getBody();
+		}
+		catch (RestClientException rce) {
+			Assertions.fail("Failed patch of Profile via request for id/body: " + profileId + " " + jsonUpdateBody.toString());
+			logger.error(() -> "patchProfileById caught exception: " + rce.toString());
+		}
+		catch (MalformedURLException mue) {
+			Assertions.fail("patchProfileById has malformed URL");
+			logger.error(() -> "patchProfileById has malformed URL: " + mue.toString());
+		}
+		return null;
+	}
+	public boolean deleteProfileById( long profileId) {
+		try {
+			String deleteUrl = new URL("http://localhost:" + port + "/api/v1/mgmt/profile/" + profileId).toString();
+			restTemplate.delete(deleteUrl);
+			// Caller to confirm Profile has been removed:
+			return true;
+		}
+		catch (RestClientException rce) {
+			Assertions.fail("deleteProfileById caught exception for profile id : " + profileId);
+			logger.error(() -> "deleteProfileById caught exception: " + rce.toString());
+		}
+		catch (MalformedURLException mue) {
+			Assertions.fail("deleteProfileById has malformed URL");
+			logger.error(() -> "deleteProfileById has malformed URL: " + mue.toString());
+		}
+		return false;
+	}
 }
