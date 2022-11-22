@@ -11,7 +11,9 @@ import org.gamesight.repository.ProfileRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,10 +41,37 @@ public class ProfileController {
 	Get all existing Profile records.
 	 */
 	@GetMapping("/api/v1/mgmt/profile")
-	List<Profile> findAllProfiles() {
+	FindAllWrapper findAllProfiles(@RequestParam (required = false, name="pageNum") Integer pageNum,
+			@RequestParam (required = false, name="pageSize") Integer pageSize,
+			@RequestParam (required = false, name="sortBy") String sortBy,
+			@RequestParam (required = false, name="sortDir") String sortDir) {
 
-		return Optional.of(profileRepository.findAll())
-				.orElseThrow(() -> new ResourceNotFoundException("finaAllProfiles failed"));
+		/*
+		Since we can only map a single GetMapping impl against our /profile operations,
+		but we want to alternatively return List<Profile or Page<Profile>, use a wrapper
+		class. The existence (or not) of the paging params will determine whether this is
+		a paged request.
+		 */
+		if (pageNum== null || pageSize==null || sortBy==null) {
+			//  Non-paged request:
+			List<Profile> profileList = Optional.of(profileRepository.findAll()).
+					orElseThrow(() -> new ResourceNotFoundException("finaAllProfiles failed"));
+			FindAllWrapper findAllWrapper = new FindAllWrapper();
+			findAllWrapper.setProfileList(profileList);
+			return findAllWrapper;
+		}
+		else {
+			// Paged request:
+			Sort sort = (sortDir==null || sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())) ?
+					Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+			Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
+
+			Page<Profile> profilePage = Optional.of(profileRepository.findAll(pageable)).
+					orElseThrow(() -> new ResourceNotFoundException("findAllProfiles paged failed"));
+
+			FindAllWrapper findAllWrapper = new FindAllWrapper(pageable, profilePage.getContent());
+			return findAllWrapper;
+		}
 	}
 
 	// TODO: Add @Valid support for Profile request param
@@ -87,7 +117,7 @@ public class ProfileController {
 	}
 
 	/*
-	 Patch a given field, State, in the Profile
+	 Patch a given field in the Profile
 	 */
 	@PatchMapping("/api/v1/mgmt/profile/{id}")
 	Optional<Profile> patchProfile(@RequestBody Map<String, String> patch, @PathVariable Long id) {

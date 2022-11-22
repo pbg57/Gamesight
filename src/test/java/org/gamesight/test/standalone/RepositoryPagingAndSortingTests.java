@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // TODO - register Junit5 extension
@@ -38,29 +39,18 @@ public class RepositoryPagingAndSortingTests {
 	void profilePaging() {
 
 		// Prepare for test by removing existing profiles.
-		List<Profile> profileList = profileRepository.findAll();
-		for (Profile p : profileList) {
-			profileRepository.deleteById(p.getId());
-		}
-		profileList = profileRepository.findAll();
-		assertEquals(0, profileList.size(), "Unable to remove all Profiles to begin testing.");
+		removeAllProfiles();
 
 		// Create multiple profiles for paging tests. The zip code field will differ in each new profile to allow sort testing.
-		Profile profile;
-		int profileCount = 10;
-		int lastZipNumber = 0;
-		for (int i = 0; i < profileCount; i++) {
-			// Note: repeated repo.save(profile) operations on same object are an 'update' action, not a 'create' action, of course.
-			lastZipNumber = 80503 + i;
-			profile = new Profile("2200 Fairways Drive", "Longmont", "CO", lastZipNumber, LocalDate.of(1957, Month.NOVEMBER, 29));
-			profileRepository.save(profile);
-		}
+		int numToCreate = 10;
+		int lastZipNumber = createTestProfiles(numToCreate);
 
 		// Make sure we have the expected number of profiles:
 		List<Profile> profiles = profileRepository.findAll();
 		long findAllTotalElements = profiles.size();
-		assertEquals(findAllTotalElements, profileCount, "Wrong number of Profiles exist in DB at start of paging test.");
+		assertEquals(findAllTotalElements, numToCreate, "Wrong number of Profiles exist in DB at start of paging test.");
 
+		// Setup paging and sorting params.
 		int pageNo = 0;		// Start on page zero, not page one !!!!
 		int pageSize = 5;
 		String sortBy = "zip";
@@ -80,7 +70,7 @@ public class RepositoryPagingAndSortingTests {
 		logPageInfo(profilePage);
 		long pagedTotalElements = profilePage.getTotalElements();
 
-
+		// Test for existence of second Page of results:
 		if (profilePage.hasNext()) {
 			Pageable pageable2 = profilePage.nextPageable();
 			Page<Profile> profilePageNext = profileRepository.findAll(pageable2);
@@ -91,6 +81,9 @@ public class RepositoryPagingAndSortingTests {
 
 		logger.debug("Paged Profile size {}, Non-paged size {}", () -> pagedTotalElements, () -> findAllTotalElements);
 		assertEquals(pagedTotalElements, findAllTotalElements, "Number of persisted findAll() Profiles differs with query by findAll(pageable)");
+
+		// Clean up post-test by removing profiles.
+		removeAllProfiles();
 	}
 
 	public static void logPageInfo(Page<Profile> profilePage) {
@@ -109,5 +102,27 @@ public class RepositoryPagingAndSortingTests {
 		for (Profile p : listOfProfiles) {
 			logger.debug("Profile details: {}", p::toString);
 		}
+	}
+
+	public void removeAllProfiles() {
+		List<Profile> profileList = profileRepository.findAll();
+		for (Profile p : profileList) {
+			profileRepository.deleteById(p.getId());
+		}
+		profileList = profileRepository.findAll();
+		assertEquals(0, profileList.size(), "Unable to remove all Profiles to begin testing.");
+	}
+
+	public int createTestProfiles(int numToCreate) {
+		Profile profile;
+		int lastZipNumber = 0;
+		for (int i = 0; i < numToCreate; i++) {
+			// Note: repeated repo.save(profile) operations on same object are an 'update' action, not a 'create' action, of course.
+			lastZipNumber = 80503 + i;
+			profile = new Profile("2200 Fairways Drive", "Longmont", "CO", lastZipNumber, LocalDate.of(1957, Month.NOVEMBER, 29));
+			profile = profileRepository.save(profile);
+			assertNotNull(profile, "Unable to create all Profiles to begin testing.");
+		}
+		return lastZipNumber;
 	}
 }
