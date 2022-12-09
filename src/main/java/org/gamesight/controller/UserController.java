@@ -9,6 +9,7 @@ import org.gamesight.model.User;
 import org.gamesight.repository.PlayerRepository;
 import org.gamesight.repository.ProfileRepository;
 import org.gamesight.repository.UserRepository;
+import org.h2.util.Profiler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,11 +29,13 @@ import org.springframework.web.bind.annotation.RestController;
 		/*
 		The UserController provides the REST CRUD services for the User entity.
  		*/
-		@Autowired
 		private UserRepository userRepository;
-		@Autowired
 		private ProfileRepository profileRepository;
 
+		UserController(UserRepository userRepository, ProfileRepository profileRepository) {
+			this.userRepository = userRepository;
+			this.profileRepository = profileRepository;
+		}
 		/*
 		Get all existing User records.
 		 */

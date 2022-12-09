@@ -21,12 +21,14 @@ public class GameController {
 	The GameController provides the REST CRUD services for the Game entity.
 	 */
 
-	@Autowired
-	private GameRepository gameRepository;
 
-	@Autowired
+	private GameRepository gameRepository;
 	private PlayerRepository playerRepository;
 
+	GameController(GameRepository gameRepository, PlayerRepository playerRepository) {
+		this.gameRepository = gameRepository;
+		this.playerRepository = playerRepository;
+	}
 
 	// TODO: Add @Valid support for player request param
 

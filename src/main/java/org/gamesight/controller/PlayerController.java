@@ -19,9 +19,11 @@ public class PlayerController {
 	The PlayerController provides the REST CRUD services for the Player entity.
 	 */
 
-	@Autowired
 	private PlayerRepository playerRepository;
 
+	PlayerController(PlayerRepository playerRepository){
+		this.playerRepository = playerRepository;
+	}
 	/*
 	Get all existing Player records.
 	 */

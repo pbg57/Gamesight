@@ -8,6 +8,7 @@ import org.gamesight.exception.PatchFieldUnsupportedException;
 import org.gamesight.exception.ResourceNotFoundException;
 import org.gamesight.model.Profile;
 import org.gamesight.repository.ProfileRepository;
+import org.h2.util.Profiler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,12 +35,18 @@ public class ProfileController {
 	/*
 	The ProfileController provides the REST CRUD services for the Profile entity.
 	 */
-	@Autowired
 	private ProfileRepository profileRepository;
 
+	ProfileController(ProfileRepository profileRepository) {
+		this.profileRepository = profileRepository;
+	}
 	/*
 	Get all existing Profile records.
 	 */
+
+	// TODO - Consider rewriting page-based processing with hypermedia support:
+	// https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#core.web
+
 	@GetMapping("/api/v1/mgmt/profile")
 	FindAllWrapper findAllProfiles(@RequestParam (required = false, name="pageNum") Integer pageNum,
 			@RequestParam (required = false, name="pageSize") Integer pageSize,

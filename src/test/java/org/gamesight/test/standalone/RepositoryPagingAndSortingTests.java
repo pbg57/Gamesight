@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gamesight.model.Profile;
+import org.gamesight.model.Profiles;
 import org.gamesight.repository.ProfileRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +36,7 @@ public class RepositoryPagingAndSortingTests {
 	private static final Logger logger = LogManager.getLogger(RepositoryPagingAndSortingTests.class);
 
 
-	@DisplayName("Test Profile entity CRUD operations via Java APIs")
+	@DisplayName("Test Profile entity paging operations via Java APIs")
 	@Test
 	void profilePaging() {
 
@@ -85,6 +87,97 @@ public class RepositoryPagingAndSortingTests {
 		// Clean up post-test by removing profiles.
 		removeAllProfiles();
 	}
+
+	@DisplayName("Test Profile entity derived-query operations via Java APIs")
+	@Test
+	void profileDerivedQuery() {
+		// Prepare for test by removing existing profiles.
+		removeAllProfiles();
+
+		// Create multiple profiles for derived query tests.
+		int numToCreate = 10;
+		createTestProfiles(numToCreate);
+
+		// Test Profile repo derived query
+		String city = "Longmont";
+		long cityCount = profileRepository.countByCity(city);
+		assertEquals(cityCount, numToCreate, "Wrong number of Profiles exist in DB for query-by-city test.");
+
+		LocalDate dob = LocalDate.of(1957, Month.NOVEMBER, 29);
+		List<Profile> dobProfileList = profileRepository.findByDob(dob);
+		assertEquals(dobProfileList.size(), numToCreate, "Wrong number of Profiles exist in DB for query-by-dob test.");
+
+		// Clean up post-test by removing profiles.
+		removeAllProfiles();
+	}
+
+
+	@DisplayName("Test Profile entity derived-query operations via Java APIs")
+	@Test
+	void profileQueryCreation() {
+		// Prepare for test by removing existing profiles.
+		removeAllProfiles();
+
+		// Create multiple profiles for derived query tests.
+		int numToCreate = 10;
+		int lastZipNumber = createTestProfiles(numToCreate);
+
+		// Test Profile repo derived query
+		String city = "Longmont";
+		String state = "CO";
+		List<Profile> cityStateProfileList = profileRepository.findByCityAndState(city,state);
+		assertEquals(cityStateProfileList.size(), numToCreate, "Wrong number of Profiles exist in DB for query-by-city test.");
+
+		String street = "2200 Fairways Drive";
+		List<Profile> streetZipAscProfiles = profileRepository.findByStreetOrderByZipAsc(street);
+		int lastZipFoundAsc = streetZipAscProfiles.get(streetZipAscProfiles.size()-1).getZip();
+		assertEquals(lastZipFoundAsc, lastZipNumber, "Wrong zip number in Profiles exist in DB for query creation test.");
+
+		// Clean up post-test by removing profiles.
+		removeAllProfiles();
+	}
+
+	@DisplayName("Test Profile entity limited query result operations via Java APIs")
+	@Test
+	void profileLimitedQuery() {
+		// Prepare for test by removing existing profiles.
+		removeAllProfiles();
+
+		// Create multiple profiles for derived query tests.
+		int numToCreate = 15;
+		int lastZipNumber = createTestProfiles(numToCreate);
+
+		// Test Profile repo derived query
+		String state = "CO";
+		Slice<Profile> top3ByState = profileRepository.findTop3ByState( state,Pageable.unpaged());
+		assertEquals(top3ByState.getSize(), 3, "Wrong number of Profiles exist in DB for limited-query test.");
+
+		Sort sort = Sort.by("zip").ascending();
+		List<Profile> lastZipAsc = profileRepository.findLast1ByZip(lastZipNumber, sort);
+		assertEquals(lastZipAsc.get(lastZipAsc.size()-1).getZip(), lastZipNumber, "Wrong zip number in Profiles exist in DB for limited-query-sort test.");
+
+		// Clean up post-test by removing profiles.
+		removeAllProfiles();
+	}
+	@DisplayName("Test Profile entity Custom Streamable wrapper result operations via Java APIs")
+	@Test
+	void profileFindIncomplete() {
+		// Prepare for test by removing existing profiles.
+		removeAllProfiles();
+
+		// Create multiple profiles for derived query tests.
+		int numToCreate = 15;
+
+		// Test Profile repo for no incomplete profiles
+		Profiles profiles  = profileRepository.findAllByDobNotNull();
+		List<Profile> incompleteProfileList = profiles.getIncompleteProfiles();
+		assertEquals(incompleteProfileList.size(), 0, "Wrong  number of Profiles exist in DB for find-incomplete profiles test.");
+
+		// Clean up post-test by removing profiles.
+		removeAllProfiles();
+	}
+
+
 
 	public static void logPageInfo(Page<Profile> profilePage) {
 		int number = profilePage.getNumber();
