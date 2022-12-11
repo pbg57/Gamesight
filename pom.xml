@@ -44,10 +44,10 @@
 	</dependency>
 
 	<!-- in-memory database. Uncomment to enable use. -->
-	<dependency>
+	<!-- dependency>
 		<groupId>com.h2database</groupId>
 		<artifactId>h2</artifactId>
-	</dependency>
+	</dependency-->
 	<!-- unit test rest -->
 	<dependency>
 		<groupId>org.springframework.boot</groupId>

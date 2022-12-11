@@ -7,19 +7,17 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Objects;
 
-import jakarta.persistence.CascadeType;
+import javax.validation.constraints.Email;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "users")
@@ -33,6 +31,9 @@ public class User implements Serializable {
 	private Long id;
 
 	LocalDateTime createDate;
+
+	@Email
+	String emailAddress;
 
 	@JsonBackReference
 	// Note: eager fetch required to have fully up-to-date User object when fetched from userRepository
@@ -90,5 +91,13 @@ public class User implements Serializable {
 	public int hashCode() {
 
 		return Objects.hash(id, createDate, profile);
+	}
+
+	public String getEmailAddress() {
+		return emailAddress;
+	}
+
+	public void setEmailAddress(String emailAddress) {
+		this.emailAddress = emailAddress;
 	}
 }

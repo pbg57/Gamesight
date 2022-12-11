@@ -79,6 +79,10 @@ public class UserAndProfileCrudTests {
 		// Cannot persist User without an associated Profile
 		User user = new User();
 		user.setProfile(persistedProfile);
+		String emailAddress = "foobar@home.com";
+		String badEmailAddress = "foobar@home.@com";
+
+		user.setEmailAddress(badEmailAddress);
 		userRepository.save(user);
 
 		// Check User values returned from database.
