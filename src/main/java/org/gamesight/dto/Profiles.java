@@ -1,9 +1,13 @@
-package org.gamesight.model;
+package org.gamesight.dto;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.gamesight.dto.ProfileDto;
+import org.gamesight.model.Profile;
 
 import org.springframework.data.util.Streamable;
 
@@ -22,10 +26,24 @@ public class Profiles implements Streamable<Profile> {
 
 
 	Predicate<Profile> NO_STREET = (p) -> p.getStreet() == null;
+
 	Predicate<Profile> NO_ZIP = (p) -> p.getZip() == 0;
+
 	Predicate<Profile> NO_CITY = (p) -> p.getCity() == null;
+
 	Predicate<Profile> NO_STATE = (p) -> p.getState() == null;
+
 	Predicate<Profile> NO_DOB = (p) -> p.getDob() == null;
+
+	Function<Profile, ProfileDto> TO_DTO = (p) -> {
+		return new ProfileDto(
+				p.getId(),
+				p.getCity(),
+				p.getStreet(),
+				p.getState(),
+				p.getZip(),
+				p.getDob());
+	};
 
 	public List<Profile> getIncompleteProfiles() {
 		List<Profile> profiles =
@@ -37,5 +55,9 @@ public class Profiles implements Streamable<Profile> {
 		return profiles;
 	}
 
+	public List<ProfileDto> toProfileDtoList() {
+		return streamable.stream().map(TO_DTO).collect(Collectors.toList());
+
+	}
 
 }

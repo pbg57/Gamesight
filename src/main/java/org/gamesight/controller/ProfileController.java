@@ -4,17 +4,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.gamesight.dao.ProfileDao;
+import org.gamesight.dto.ProfileDto;
 import org.gamesight.exception.PatchFieldUnsupportedException;
+import org.gamesight.exception.ResourceAlreadyExistsException;
 import org.gamesight.exception.ResourceNotFoundException;
 import org.gamesight.model.Profile;
-import org.gamesight.repository.ProfileRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -33,10 +36,12 @@ public class ProfileController {
 	/*
 	The ProfileController provides the REST CRUD services for the Profile entity.
 	 */
-	private ProfileRepository profileRepository;
+	private final ProfileDao profileDao;
 
-	ProfileController(ProfileRepository profileRepository) {
-		this.profileRepository = profileRepository;
+	private static final Logger logger = LogManager.getLogger(ProfileController.class);
+
+	ProfileController(ProfileDao profileDao) {
+		this.profileDao = profileDao;
 	}
 	/*
 	Get all existing Profile records.
@@ -46,10 +51,10 @@ public class ProfileController {
 	// https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#core.web
 
 	@GetMapping("/api/v1/mgmt/profile")
-	FindAllWrapper findAllProfiles(@RequestParam (required = false, name="pageNum") Integer pageNum,
-			@RequestParam (required = false, name="pageSize") Integer pageSize,
-			@RequestParam (required = false, name="sortBy") String sortBy,
-			@RequestParam (required = false, name="sortDir") String sortDir) {
+	FindAllWrapper findAllProfiles(@RequestParam(required = false, name = "pageNum") Integer pageNum,
+			@RequestParam(required = false, name = "pageSize") Integer pageSize,
+			@RequestParam(required = false, name = "sortBy") String sortBy,
+			@RequestParam(required = false, name = "sortDir") String sortDir) {
 
 		/*
 		Since we can only map a single GetMapping impl against our /profile operations,
@@ -57,9 +62,9 @@ public class ProfileController {
 		class. The existence (or not) of the paging params will determine whether this is
 		a paged request.
 		 */
-		if (pageNum== null || pageSize==null || sortBy==null) {
+		if (pageNum == null || pageSize == null || sortBy == null) {
 			//  Non-paged request:
-			List<Profile> profileList = Optional.of(profileRepository.findAll()).
+			List<Profile> profileList = Optional.of(profileDao.findAll()).
 					orElseThrow(() -> new ResourceNotFoundException("finaAllProfiles failed"));
 			FindAllWrapper findAllWrapper = new FindAllWrapper();
 			findAllWrapper.setProfileList(profileList);
@@ -67,15 +72,14 @@ public class ProfileController {
 		}
 		else {
 			// Paged request:
-			Sort sort = (sortDir==null || sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())) ?
+			Sort sort = (sortDir == null || sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())) ?
 					Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
 			Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
 
-			Page<Profile> profilePage = Optional.of(profileRepository.findAll(pageable)).
+			Page<Profile> profilePage = Optional.of(profileDao.findAll(pageable)).
 					orElseThrow(() -> new ResourceNotFoundException("findAllProfiles paged failed"));
 
-			FindAllWrapper findAllWrapper = new FindAllWrapper(pageable, profilePage.getContent());
-			return findAllWrapper;
+			return new FindAllWrapper(pageable, profilePage.getContent());
 		}
 	}
 
@@ -86,18 +90,26 @@ public class ProfileController {
 	@PostMapping(value = "/api/v1/mgmt/profile")
 	//return 201 instead of 200 to signify resource was created
 	@ResponseStatus(HttpStatus.CREATED)
-	Profile createProfile(@RequestBody Profile profile) {
+	ProfileDto createProfile(@RequestBody ProfileDto profileDto) {
 
-		return Optional.of(profileRepository.save(profile))
-				.orElseThrow(() -> new ResourceNotFoundException("createProfile failed"));
+		ProfileDto returnVal = null;
+		try {
+			logger.info("Create Profile request ProfileDto: : {} ", () -> profileDto);
+			returnVal = Optional.of(profileDao.createProfile(profileDto))
+					.orElseThrow(() -> new ResourceNotFoundException("createProfile failed"));
+		} catch (ResourceAlreadyExistsException raee) {
+			logger.warn("Create Profile from profileDto failed: {} ", () -> profileDto);
+		}
+		logger.info("Create Profile response ProfileDto: : " +  returnVal);
+		return returnVal;
 	}
 
 	/*
-	Get Profile by Id.
+	Get Profile by id.
 	 */
 	@GetMapping("/api/v1/mgmt/profile/{id}")
-	Optional<Profile> getProfile(@PathVariable Long id) {
-		return Optional.ofNullable(profileRepository.findById(id)    // Return found object else throw exception
+	Optional<ProfileDto> getProfile(@PathVariable Long id) {
+		return Optional.ofNullable(profileDao.findById(id)    // Return found object else throw exception
 				.orElseThrow(() -> new ResourceNotFoundException(id)));
 	}
 
@@ -105,51 +117,60 @@ public class ProfileController {
 	 Update the entire Profile via a PUT request
 	 */
 	@PutMapping("/api/v1/mgmt/profile/{id}")
-	Optional<Profile> updateProfile(@RequestBody Profile profileUpdate, @PathVariable Long id) {
+	Optional<ProfileDto> updateProfile(@RequestBody ProfileDto profileDto, @PathVariable Long id) {
 
-		return Optional.of(profileRepository.findById(id)
-				.map(x -> {
-					x.setStreet(profileUpdate.getStreet());
-					x.setCity(profileUpdate.getCity());
-					x.setState(profileUpdate.getState());
-					x.setZip(profileUpdate.getZip());
-					x.setDob(profileUpdate.getDob());
-					return profileRepository.save(x);
+		logger.info("Update Profile request id {} ProfileDto {} ", id, profileDto);
+
+
+
+		return Optional.of(profileDao.findById(id)
+				.map(dto -> {
+					dto.setStreet(profileDto.getStreet());
+					dto.setCity(profileDto.getCity());
+					dto.setState(profileDto.getState());
+					dto.setZip(profileDto.getZip());
+					dto.setDob(profileDto.getDob());
+					dto.setId(id);
+
+					logger.info("Update Profile findById rsp: ProfileDto {} ", dto);
+					ProfileDto response = profileDao.updateProfile(dto);
+					logger.info("Update Profile updateProfile rsp: ProfileDto {} ", response);
+					return response;
+
 				})
-				.orElseGet(() -> {
-					throw new ResourceNotFoundException(id);
-				}));
+				.orElseThrow(() -> new ResourceNotFoundException(id)));
+
+
 	}
 
 	/*
 	 Patch a given field in the Profile
 	 */
 	@PatchMapping("/api/v1/mgmt/profile/{id}")
-	Optional<Profile> patchProfile(@RequestBody Map<String, String> patch, @PathVariable Long id) {
+	Optional<ProfileDto> patchProfile(@RequestBody Map<String, String> patch, @PathVariable Long id) {
 
-		return Optional.of(profileRepository.findById(id)
-				.map(x -> {
+		return Optional.of(profileDao.findById(id)
+				.map(dto -> {
 
 					// TODO: iterate on map keySet and Switch on requested fields
 					String state = patch.get("state");
-					if (!StringUtils.isEmpty(state)) {
+					if (!(state == null)) {
 						// Update the requested field(s) on the current Profile and persist/patch
 						// those fields.
-						x.setState(state);
-						return profileRepository.save(x);
+						dto.setState(state);
+						return profileDao.updateProfile(dto);
 					}
 					else {
 						throw new PatchFieldUnsupportedException(patch.keySet());
 					}
 				})
-				.orElseGet(() -> {
-					throw new ResourceNotFoundException(id);
-				}));
+				.orElseThrow(() -> new ResourceNotFoundException(id)));
 	}
 
 	@DeleteMapping("/api/v1/mgmt/profile/{id}")
 	void deleteProfile(@PathVariable Long id) {
-		profileRepository.deleteById(id);
+
+		profileDao.deleteById(id);
 	}
 
 }

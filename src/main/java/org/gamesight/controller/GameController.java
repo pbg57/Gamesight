@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class GameController {
+	// TODO: Add use of GameDto objects and a GameDao repo interface.
 
 	/*
 	The GameController provides the REST CRUD services for the Game entity.

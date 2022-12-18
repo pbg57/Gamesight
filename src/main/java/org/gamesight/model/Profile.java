@@ -26,7 +26,7 @@ public class Profile implements Serializable {
 	 */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long id = null;
 
 	@Size(max = 100)
 	private String street;
@@ -49,7 +49,8 @@ public class Profile implements Serializable {
 
 	public Profile() {}
 
-	public Profile (String street, String city, String state, int zip, LocalDate dob) {
+	public Profile (Long id, String street, String city, String state, int zip, LocalDate dob) {
+		this.id = id;
 		this.street = street;
 		this.city = city;
 		this.state = state;
@@ -101,20 +102,10 @@ public class Profile implements Serializable {
 	public Long getId() {
 		return id;
 	}
-
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		Profile profile = (Profile) o;
-		return zip == profile.zip && Objects.equals(street, profile.street) && Objects.equals(city, profile.city) && Objects.equals(state, profile.state) && Objects.equals(dob, profile.dob);
+	public void setId(Long id) {
+		this.id = id;
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, street, city, state, zip, dob);
-	}
 
 	@Override
 	public String toString() {
@@ -127,5 +118,18 @@ public class Profile implements Serializable {
 				", dob=" + dob +
 				", user=" + user +
 				'}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Profile profile = (Profile) o;
+		return zip == profile.zip && Objects.equals(street, profile.street) && Objects.equals(city, profile.city) && Objects.equals(state, profile.state) && Objects.equals(dob, profile.dob) && Objects.equals(user, profile.user);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(street, city, state, zip, dob, user);
 	}
 }

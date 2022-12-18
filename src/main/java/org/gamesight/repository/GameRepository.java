@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GameRepository extends JpaRepository<Game, Long> {
+	// TODO: Add use of GameDao repo interface.
+
 	/*
 	The GameRepository for the Game entity.
 	 */

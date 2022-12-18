@@ -14,6 +14,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 @EnableJpaRepositories
 public interface PlayerRepository extends JpaRepository<Player, Long> {
+
+	// TODO: Add use of PlayerDao repo interface.
+
 	/*
 	The PlayerRepository for the Player entity.
 	 */

@@ -2,6 +2,7 @@ package org.gamesight.model;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
@@ -101,5 +102,18 @@ public class Player extends UserTemporal implements Serializable {
 	public void setUser(User user) {
 
 		this.user = user;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Player player = (Player) o;
+		return Objects.equals(id, player.id) && Objects.equals(name, player.name) && Objects.equals(games, player.games) && Objects.equals(user, player.user);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, name, games, user);
 	}
 }

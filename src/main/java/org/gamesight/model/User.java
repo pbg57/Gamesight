@@ -10,6 +10,7 @@ import java.util.Objects;
 import javax.validation.constraints.Email;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -18,9 +19,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+		uniqueConstraints=
+		@UniqueConstraint(columnNames={"emailAddress"}))
 public class User implements Serializable {
 
 	/*
@@ -37,6 +41,7 @@ public class User implements Serializable {
 
 	@JsonBackReference
 	// Note: eager fetch required to have fully up-to-date User object when fetched from userRepository
+//	@OneToOne(fetch = FetchType.EAGER, cascade =  CascadeType.ALL, optional = false)
 	@OneToOne(fetch = FetchType.EAGER, optional = false)
 	@JoinColumn(name = "profile_id", nullable = false)
 	public Profile profile;
@@ -77,6 +82,10 @@ public class User implements Serializable {
 	public Long getId() {
 
 		return id;
+	}
+	public void setId(Long id) {
+
+		this.id =  id;
 	}
 
 	@Override
