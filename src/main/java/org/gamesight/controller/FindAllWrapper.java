@@ -3,6 +3,7 @@ package org.gamesight.controller;
 import java.io.Serializable;
 import java.util.List;
 
+import org.gamesight.dto.ProfileDto;
 import org.gamesight.model.Profile;
 
 import org.springframework.data.domain.Pageable;

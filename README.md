@@ -17,3 +17,10 @@ Nov. 19th 2022
 * Data model: Game, Player, Profile, User. Hibernate/JPA Entities to demo 1:1, 1:N, N:N relationships.
 * Data persistence/Testing: In-memory H2 or PostgreSql integration. See JUnit UserAndProfileCrudTests and RepositoryPagingAndSortingTests.
 * Restful controllers/Testing: My first iteration focuses on the Profile entity, only. See the Spring ProfileController and ProfileControllerTest.
+
+Dec. 18th 2022
+* Add DTO (data transfer objects) classes and tests for Profile and User entities. 
+** Refactor User and Profile controllers to use the DTO classes.
+* Add DAO (data access objects) classes and tests for Profile and User entities.
+** Refactor User and Profile controllers to use the DAO classes.
+

@@ -15,13 +15,16 @@ import org.gamesight.repository.PlayerRepository;
 @RestController
 public class PlayerController {
 
+	// TODO: Add use of PlayerDto objects and a PlayerDao repo interface.
 	/*
 	The PlayerController provides the REST CRUD services for the Player entity.
 	 */
 
-	@Autowired
 	private PlayerRepository playerRepository;
 
+	PlayerController(PlayerRepository playerRepository){
+		this.playerRepository = playerRepository;
+	}
 	/*
 	Get all existing Player records.
 	 */

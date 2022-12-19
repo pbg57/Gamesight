@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.gamesight.controller.FindAllWrapper;
 import org.gamesight.model.Profile;
 import org.json.JSONObject;
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -92,9 +92,9 @@ public class ProfileControllerTest {
 
 	private final LocalDate dob = LocalDate.of(2000, Month.NOVEMBER, 29);
 
-	private final Profile testProfile = new Profile(street, city, state, zip, dob);
+	private final Profile testProfile = new Profile(null, street, city, state, zip, dob);
 
-	private final Profile testPutProfile = new Profile(street, city, stateUpdate, zip, dob);
+	private final Profile testPutProfile = new Profile(null, street, city, stateUpdate, zip, dob);
 
 	private final Profile testPatchProfile = new Profile();
 
@@ -451,7 +451,7 @@ public class ProfileControllerTest {
 
 		for (int i = 0; i < numToCreate; i++) {
 			lastZipNumber = 10020 + i;
-			profile = new Profile("2200 Fairways Drive", "Longmont", "CO", lastZipNumber, LocalDate.of(1957, Month.NOVEMBER, 29));
+			profile = new Profile(null, "2200 Fairways Drive", "Longmont", "CO", lastZipNumber, LocalDate.of(1957, Month.NOVEMBER, 29));
 			HttpEntity<Profile> profileHttpEntity = new HttpEntity<>(profile);
 			createProfile(profileHttpEntity);
 		}

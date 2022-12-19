@@ -7,22 +7,24 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.validation.constraints.Email;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+		uniqueConstraints=
+		@UniqueConstraint(columnNames={"emailAddress"}))
 public class User implements Serializable {
 
 	/*
@@ -34,8 +36,12 @@ public class User implements Serializable {
 
 	LocalDateTime createDate;
 
+	@Email
+	String emailAddress;
+
 	@JsonBackReference
 	// Note: eager fetch required to have fully up-to-date User object when fetched from userRepository
+//	@OneToOne(fetch = FetchType.EAGER, cascade =  CascadeType.ALL, optional = false)
 	@OneToOne(fetch = FetchType.EAGER, optional = false)
 	@JoinColumn(name = "profile_id", nullable = false)
 	public Profile profile;
@@ -77,6 +83,10 @@ public class User implements Serializable {
 
 		return id;
 	}
+	public void setId(Long id) {
+
+		this.id =  id;
+	}
 
 	@Override
 	public boolean equals(Object o) {
@@ -90,5 +100,13 @@ public class User implements Serializable {
 	public int hashCode() {
 
 		return Objects.hash(id, createDate, profile);
+	}
+
+	public String getEmailAddress() {
+		return emailAddress;
+	}
+
+	public void setEmailAddress(String emailAddress) {
+		this.emailAddress = emailAddress;
 	}
 }
