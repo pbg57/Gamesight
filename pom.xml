@@ -31,6 +31,25 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-web</artifactId>
 	</dependency>
+	<!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-context</artifactId>
+		<version>6.1.14</version>
+	</dependency>
+
+	<!-- https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core -->
+	<dependency>
+		<groupId>org.apache.tomcat.embed</groupId>
+		<artifactId>tomcat-embed-core</artifactId>
+		<version>10.1.33</version>
+	</dependency>
+	<!-- https://mvnrepository.com/artifact/org.apache.coyote/com.springsource.org.apache.coyote -->
+<!--	<dependency>-->
+<!--		<groupId>org.apache.coyote</groupId>-->
+<!--		<artifactId>com.springsource.org.apache.coyote</artifactId>-->
+<!--		<version>7.0.26</version>-->
+<!--	</dependency>-->
 
 	<!-- jpa, crud repository -->
 	<dependency>
@@ -47,6 +66,13 @@
 	<dependency>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-test</artifactId>
+		<scope>test</scope>
+	</dependency>
+	<!-- https://mvnrepository.com/artifact/org.xmlunit/xmlunit-core -->
+	<dependency>
+		<groupId>org.xmlunit</groupId>
+		<artifactId>xmlunit-core</artifactId>
+		<version>2.10.0</version>
 		<scope>test</scope>
 	</dependency>
 
