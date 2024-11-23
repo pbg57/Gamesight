@@ -15,6 +15,9 @@ public class ProfileDto {
 	may need to be added here.
 	 */
 
+	// TODO - use Lombok library to generate getters and setters
+
+
 	private String street;
 	private String city;
 	private String state;

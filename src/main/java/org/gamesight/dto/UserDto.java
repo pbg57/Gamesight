@@ -20,6 +20,8 @@ public class UserDto {
 	convenience.
 	 */
 
+	// TODO - use Lombok library to generate getters and setters
+
 // TODO add validator logic to support Email annotation
 	@Email
 	private String emailAddress;
